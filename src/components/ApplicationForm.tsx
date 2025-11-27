@@ -19,11 +19,10 @@ const ApplicationForm: React.FC = () => {
   const [errorMessage, setErrorMessage] = useState('');
 
   // ---------------------------------------------------------------------------
-  // CONFIGURATION
-  // This looks for VITE_FORMSPREE_ENDPOINT in your .env file or Vercel Settings.
-  // If not found, it falls back to simulation mode.
-  // Casting import.meta to any to avoid TS errors if types aren't fully configured
-  const FORMSPREE_ENDPOINT = (import.meta as any).env?.VITE_FORMSPREE_ENDPOINT || ""; 
+  // CONFIGURAÇÃO DO FORMULÁRIO
+  // Para tornar funcional: Crie uma conta no Formspree.io e cole sua URL abaixo.
+  // Exemplo: "https://formspree.io/f/xyzyqwer"
+  const FORMSPREE_ENDPOINT = ""; 
   // ---------------------------------------------------------------------------
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -38,20 +37,20 @@ const ApplicationForm: React.FC = () => {
     setStatus('submitting');
     setErrorMessage('');
 
-    // SIMULATION MODE (If no endpoint is configured)
+    // Se não houver Endpoint configurado, roda em modo de simulação
     if (!FORMSPREE_ENDPOINT) {
       setTimeout(() => {
         console.log("------------------------------------------------");
-        console.log("⚠️ SIMULATION MODE");
-        console.log("To make this live, set VITE_FORMSPREE_ENDPOINT in your .env or Vercel settings.");
-        console.log("DATA SENT:", formState);
+        console.log("SIMULAÇÃO DE ENVIO DE FORMULÁRIO");
+        console.log("Para receber por email, configure a variável FORMSPREE_ENDPOINT no código.");
+        console.log("DADOS ENVIADOS:", formState);
         console.log("------------------------------------------------");
         setStatus('success');
       }, 1500);
       return;
     }
 
-    // LIVE MODE (Send to Formspree)
+    // Envio Real via Formspree
     try {
       const response = await fetch(FORMSPREE_ENDPOINT, {
         method: 'POST',
@@ -59,37 +58,29 @@ const ApplicationForm: React.FC = () => {
           'Content-Type': 'application/json',
           'Accept': 'application/json'
         },
-        body: JSON.stringify({
-          ...formState,
-          _subject: `Nova Candidatura Martinali: ${formState.company}`, // Custom subject line for email
-        })
+        body: JSON.stringify(formState)
       });
 
       if (response.ok) {
         setStatus('success');
-        setFormState({ // Reset form
+        setFormState({ // Limpar formulário
           fullName: '', company: '', role: '', email: '', 
           instagram: '', currentMoment: '', budget: '', goals: ''
         });
       } else {
         const data = await response.json();
-        // Handle Formspree specific errors or generic errors
-        // Replacing Object.hasOwn for compatibility
-        if (Object.prototype.hasOwnProperty.call(data, 'errors')) {
-            throw new Error(data.errors.map((err: any) => err.message).join(", "));
-        }
-        throw new Error("Ocorreu um erro ao enviar.");
+        throw new Error(data.error || "Ocorreu um erro ao enviar.");
       }
     } catch (error) {
-      console.error("Submission Error:", error);
+      console.error("Erro no envio:", error);
       setStatus('error');
-      setErrorMessage("Não foi possível enviar a candidatura. Por favor, verifique a sua conexão ou envie-nos um email diretamente.");
+      setErrorMessage("Houve um problema ao enviar a sua candidatura. Por favor, tente novamente ou contacte-nos diretamente por email.");
     }
   };
 
   if (status === 'success') {
     return (
-      <div className="bg-white p-12 shadow-2xl text-center border-t-4 border-gold-400 animate-fade-in">
+      <div className="bg-white p-12 text-center border-t-4 border-gold-400 animate-fade-in">
         <h3 className="font-serif text-3xl text-stone-900 mb-4">Candidatura Recebida</h3>
         <p className="text-stone-600 mb-8 max-w-md mx-auto">
           Obrigado pelo interesse na Martinali. A nossa equipa irá analisar o teu perfil e a tua marca. Entraremos em contacto em breve se houver alinhamento estratégico.
@@ -100,18 +91,14 @@ const ApplicationForm: React.FC = () => {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white p-8 md:p-12 shadow-2xl border border-stone-100 relative">
+    <form onSubmit={handleSubmit} className="bg-white px-4 py-8 md:p-12 relative">
       {status === 'error' && (
-        <div className="bg-red-50 text-red-800 p-4 mb-6 text-sm border-l-4 border-red-500 rounded-sm">
-          <p className="font-bold mb-1">Erro no envio</p>
-          <p>{errorMessage}</p>
+        <div className="bg-red-50 text-red-800 p-4 mb-6 text-sm border-l-4 border-red-500">
+          {errorMessage}
         </div>
       )}
 
-      {/* Hidden HoneyPot Field for Spam Protection (Formspree) */}
-      <input type="text" name="_gotcha" style={{display: 'none'}} />
-
-      <div className="space-y-6">
+      <div className="space-y-8">
         
         {/* Name */}
         <div>
@@ -122,13 +109,13 @@ const ApplicationForm: React.FC = () => {
             required
             value={formState.fullName}
             onChange={handleChange}
-            className="w-full bg-stone-50 border border-stone-200 p-4 focus:outline-none focus:border-gold-400 transition-colors placeholder:text-stone-300"
+            className="w-full bg-stone-50 border-b border-stone-200 p-3 focus:outline-none focus:border-gold-400 transition-colors placeholder:text-stone-300"
             placeholder="Ana Silva"
           />
         </div>
 
         {/* Company & Role Row */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div>
             <label className="block text-xs uppercase tracking-widest text-stone-500 mb-2 font-semibold">Empresa *</label>
             <input 
@@ -137,7 +124,7 @@ const ApplicationForm: React.FC = () => {
               required
               value={formState.company}
               onChange={handleChange}
-              className="w-full bg-stone-50 border border-stone-200 p-4 focus:outline-none focus:border-gold-400 transition-colors"
+              className="w-full bg-stone-50 border-b border-stone-200 p-3 focus:outline-none focus:border-gold-400 transition-colors"
             />
           </div>
           <div>
@@ -148,7 +135,7 @@ const ApplicationForm: React.FC = () => {
               required
               value={formState.role}
               onChange={handleChange}
-              className="w-full bg-stone-50 border border-stone-200 p-4 focus:outline-none focus:border-gold-400 transition-colors"
+              className="w-full bg-stone-50 border-b border-stone-200 p-3 focus:outline-none focus:border-gold-400 transition-colors"
             />
           </div>
         </div>
@@ -162,7 +149,7 @@ const ApplicationForm: React.FC = () => {
             required
             value={formState.email}
             onChange={handleChange}
-            className="w-full bg-stone-50 border border-stone-200 p-4 focus:outline-none focus:border-gold-400 transition-colors"
+            className="w-full bg-stone-50 border-b border-stone-200 p-3 focus:outline-none focus:border-gold-400 transition-colors"
             placeholder="ana@suaempresa.com"
           />
         </div>
@@ -176,7 +163,7 @@ const ApplicationForm: React.FC = () => {
             required
             value={formState.instagram}
             onChange={handleChange}
-            className="w-full bg-stone-50 border border-stone-200 p-4 focus:outline-none focus:border-gold-400 transition-colors"
+            className="w-full bg-stone-50 border-b border-stone-200 p-3 focus:outline-none focus:border-gold-400 transition-colors"
             placeholder="@suamarca"
           />
         </div>
@@ -190,7 +177,7 @@ const ApplicationForm: React.FC = () => {
               required
               value={formState.currentMoment}
               onChange={handleChange}
-              className="w-full bg-stone-50 border border-stone-200 p-4 focus:outline-none focus:border-gold-400 transition-colors appearance-none"
+              className="w-full bg-stone-50 border-b border-stone-200 p-3 focus:outline-none focus:border-gold-400 transition-colors appearance-none bg-transparent rounded-none"
             >
               <option value="" disabled>Selecionar opção...</option>
               <option value="launch">Fase de Lançamento / Ideia</option>
@@ -246,7 +233,7 @@ const ApplicationForm: React.FC = () => {
           ></textarea>
         </div>
 
-        <div className="pt-4">
+        <div className="pt-8">
           <Button type="submit" fullWidth disabled={status === 'submitting'} variant="dark">
             {status === 'submitting' ? (
               <span className="flex items-center justify-center gap-2">
