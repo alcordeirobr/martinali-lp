@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import Button from './Button';
 import { FormData } from '../types';
@@ -18,10 +19,11 @@ const ApplicationForm: React.FC = () => {
   const [errorMessage, setErrorMessage] = useState('');
 
   // ---------------------------------------------------------------------------
-  // CONFIGURAÇÃO DO FORMULÁRIO
-  // Para tornar funcional: Crie uma conta no Formspree.io e cole sua URL abaixo.
-  // Exemplo: "https://formspree.io/f/xyzyqwer"
-  const FORMSPREE_ENDPOINT = ""; 
+  // CONFIGURATION
+  // This looks for VITE_FORMSPREE_ENDPOINT in your .env file or Vercel Settings.
+  // If not found, it falls back to simulation mode.
+  // Casting import.meta to any to avoid TS errors if types aren't fully configured
+  const FORMSPREE_ENDPOINT = (import.meta as any).env?.VITE_FORMSPREE_ENDPOINT || ""; 
   // ---------------------------------------------------------------------------
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -36,20 +38,20 @@ const ApplicationForm: React.FC = () => {
     setStatus('submitting');
     setErrorMessage('');
 
-    // Se não houver Endpoint configurado, roda em modo de simulação
+    // SIMULATION MODE (If no endpoint is configured)
     if (!FORMSPREE_ENDPOINT) {
       setTimeout(() => {
         console.log("------------------------------------------------");
-        console.log("SIMULAÇÃO DE ENVIO DE FORMULÁRIO");
-        console.log("Para receber por email, configure a variável FORMSPREE_ENDPOINT no código.");
-        console.log("DADOS ENVIADOS:", formState);
+        console.log("⚠️ SIMULATION MODE");
+        console.log("To make this live, set VITE_FORMSPREE_ENDPOINT in your .env or Vercel settings.");
+        console.log("DATA SENT:", formState);
         console.log("------------------------------------------------");
         setStatus('success');
       }, 1500);
       return;
     }
 
-    // Envio Real via Formspree
+    // LIVE MODE (Send to Formspree)
     try {
       const response = await fetch(FORMSPREE_ENDPOINT, {
         method: 'POST',
@@ -57,23 +59,31 @@ const ApplicationForm: React.FC = () => {
           'Content-Type': 'application/json',
           'Accept': 'application/json'
         },
-        body: JSON.stringify(formState)
+        body: JSON.stringify({
+          ...formState,
+          _subject: `Nova Candidatura Martinali: ${formState.company}`, // Custom subject line for email
+        })
       });
 
       if (response.ok) {
         setStatus('success');
-        setFormState({ // Limpar formulário
+        setFormState({ // Reset form
           fullName: '', company: '', role: '', email: '', 
           instagram: '', currentMoment: '', budget: '', goals: ''
         });
       } else {
         const data = await response.json();
-        throw new Error(data.error || "Ocorreu um erro ao enviar.");
+        // Handle Formspree specific errors or generic errors
+        // Replacing Object.hasOwn for compatibility
+        if (Object.prototype.hasOwnProperty.call(data, 'errors')) {
+            throw new Error(data.errors.map((err: any) => err.message).join(", "));
+        }
+        throw new Error("Ocorreu um erro ao enviar.");
       }
     } catch (error) {
-      console.error("Erro no envio:", error);
+      console.error("Submission Error:", error);
       setStatus('error');
-      setErrorMessage("Houve um problema ao enviar a sua candidatura. Por favor, tente novamente ou contacte-nos diretamente por email.");
+      setErrorMessage("Não foi possível enviar a candidatura. Por favor, verifique a sua conexão ou envie-nos um email diretamente.");
     }
   };
 
@@ -92,10 +102,14 @@ const ApplicationForm: React.FC = () => {
   return (
     <form onSubmit={handleSubmit} className="bg-white p-8 md:p-12 shadow-2xl border border-stone-100 relative">
       {status === 'error' && (
-        <div className="bg-red-50 text-red-800 p-4 mb-6 text-sm border-l-4 border-red-500">
-          {errorMessage}
+        <div className="bg-red-50 text-red-800 p-4 mb-6 text-sm border-l-4 border-red-500 rounded-sm">
+          <p className="font-bold mb-1">Erro no envio</p>
+          <p>{errorMessage}</p>
         </div>
       )}
+
+      {/* Hidden HoneyPot Field for Spam Protection (Formspree) */}
+      <input type="text" name="_gotcha" style={{display: 'none'}} />
 
       <div className="space-y-6">
         
