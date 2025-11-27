@@ -152,7 +152,7 @@ function App() {
         </div>
       </Section>
 
-      {/* SECÇÃO 5: FORMULÁRIO (Mantido como estava, apenas reposicionado no flow) */}
+      {/* SECÇÃO 5: FORMULÁRIO */}
       <Section id="contact">
         <div className="max-w-4xl mx-auto bg-white p-1 md:p-8 shadow-2xl shadow-stone-200/50">
           <div className="text-center mb-12 pt-8">
