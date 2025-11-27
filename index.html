@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Martinali Creative - Estratégia e Direção Criativa</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Montserrat', 'sans-serif'],
+              serif: ['Cormorant Garamond', 'serif'],
+            },
+            colors: {
+              gold: {
+                100: '#F9F1D8',
+                200: '#F0E0AA',
+                400: '#D4AF37',
+                500: '#C5A028',
+                600: '#A08020',
+              },
+              wine: {
+                900: '#2C0B10',
+                950: '#1A0508',
+              },
+              stone: {
+                850: '#1F1F1E',
+                900: '#161615',
+                950: '#0C0C0C',
+              }
+            },
+            animation: {
+              'fade-in': 'fadeIn 1s ease-out',
+              'fade-in-up': 'fadeInUp 1s ease-out',
+            },
+            keyframes: {
+              fadeIn: {
+                '0%': { opacity: '0' },
+                '100%': { opacity: '1' },
+              },
+              fadeInUp: {
+                '0%': { opacity: '0', transform: 'translateY(20px)' },
+                '100%': { opacity: '1', transform: 'translateY(0)' },
+              }
+            }
+          }
+        }
+      }
+    </script>
+    <style>
+      /* Smooth scrolling for anchor links */
+      html {
+        scroll-behavior: smooth;
+      }
+      /* Adjust base font size for Cormorant which can be small */
+      .font-serif {
+        font-feature-settings: "lnum", "pnum";
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.555.0"
+  }
+}
+</script>
+</head>
+  <body class="bg-stone-50 text-stone-800 antialiased selection:bg-gold-400 selection:text-white">
+    <div id="root"></div>
+  </body>
+</html>
